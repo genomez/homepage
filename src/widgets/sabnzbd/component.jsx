@@ -19,7 +19,8 @@ export default function Component({ service }) {
 
   const { widget } = service;
 
-  const { data: queueData, error: queueError } = useWidgetAPI(widget, "queue");
+  const refreshInterval = widget.refreshInterval ? Math.max(1000, widget.refreshInterval) : undefined;
+  const { data: queueData, error: queueError } = useWidgetAPI(widget, "queue", { refreshInterval });
 
   if (queueError) {
     return <Container service={service} error={queueError} />;

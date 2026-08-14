@@ -53,4 +53,34 @@ describe("widgets/sabnzbd/component", () => {
     expectBlockValue(container, "sabnzbd.queue", 2);
     expectBlockValue(container, "sabnzbd.timeleft", "00:01:00");
   });
+
+  it("does not enable polling when refreshInterval is omitted", () => {
+    const widget = { type: "sabnzbd", url: "http://sabnzbd" };
+
+    renderWithProviders(<Component service={{ widget }} />, {
+      settings: { hideErrors: false },
+    });
+
+    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { refreshInterval: undefined });
+  });
+
+  it("passes the configured refresh interval to the widget API", () => {
+    const widget = { type: "sabnzbd", url: "http://sabnzbd", refreshInterval: 5000 };
+
+    renderWithProviders(<Component service={{ widget }} />, {
+      settings: { hideErrors: false },
+    });
+
+    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { refreshInterval: 5000 });
+  });
+
+  it("clamps refresh intervals below one second", () => {
+    const widget = { type: "sabnzbd", url: "http://sabnzbd", refreshInterval: 500 };
+
+    renderWithProviders(<Component service={{ widget }} />, {
+      settings: { hideErrors: false },
+    });
+
+    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { refreshInterval: 1000 });
+  });
 });
