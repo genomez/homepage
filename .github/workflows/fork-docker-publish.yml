@@ -3,7 +3,7 @@ name: Fork Docker Publish
 on:
   push:
     branches:
-      - codex/sabnzbd-refresh-interval-v2
+      - sabnzbd-refresh-interval-v2
   workflow_dispatch:
 
 env:
