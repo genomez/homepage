@@ -17,15 +17,39 @@ describe("utils/proxy/use-widget-api", () => {
     useSWR.mockReturnValue({ data: { ok: true }, error: undefined, mutate: "m" });
 
     const widget = { service_group: "g", service_name: "s", index: 0 };
-    const result = useWidgetAPI(widget, "status", { refreshInterval: 123, foo: "bar" });
+    const result = useWidgetAPI(widget, "status", { refreshInterval: 5000, foo: "bar" });
 
     expect(useSWR).toHaveBeenCalledWith(
       expect.stringContaining("/api/services/proxy?"),
-      expect.objectContaining({ refreshInterval: 123 }),
+      expect.objectContaining({ refreshInterval: 5000 }),
     );
     expect(result.data).toEqual({ ok: true });
     expect(result.error).toBeUndefined();
     expect(result.mutate).toBe("m");
+  });
+
+  it("passes the widget refreshInterval to SWR when configured", () => {
+    useSWR.mockReturnValue({ data: undefined, error: undefined, mutate: vi.fn() });
+
+    const widget = { service_group: "g", service_name: "s", index: 0, refreshInterval: 5000 };
+    useWidgetAPI(widget, "status");
+
+    expect(useSWR).toHaveBeenCalledWith(
+      expect.stringContaining("/api/services/proxy?"),
+      expect.objectContaining({ refreshInterval: 5000 }),
+    );
+  });
+
+  it("clamps widget refreshInterval to one second", () => {
+    useSWR.mockReturnValue({ data: undefined, error: undefined, mutate: vi.fn() });
+
+    const widget = { service_group: "g", service_name: "s", index: 0, refreshInterval: 500 };
+    useWidgetAPI(widget, "status");
+
+    expect(useSWR).toHaveBeenCalledWith(
+      expect.stringContaining("/api/services/proxy?"),
+      expect.objectContaining({ refreshInterval: 1000 }),
+    );
   });
 
   it("returns data.error as the top-level error", () => {

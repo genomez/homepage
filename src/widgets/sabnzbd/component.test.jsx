@@ -9,6 +9,14 @@ import { expectBlockValue } from "test-utils/widget-assertions";
 const { useWidgetAPI } = vi.hoisted(() => ({ useWidgetAPI: vi.fn() }));
 vi.mock("utils/proxy/use-widget-api", () => ({ default: useWidgetAPI }));
 
+vi.mock("../../components/widgets/queue/queueEntry", () => ({
+  default: ({ title, activity, progress }) => (
+    <div data-testid="queue-entry" data-activity={activity} data-progress={progress}>
+      {title}
+    </div>
+  ),
+}));
+
 import Component from "./component";
 
 describe("widgets/sabnzbd/component", () => {
@@ -54,33 +62,53 @@ describe("widgets/sabnzbd/component", () => {
     expectBlockValue(container, "sabnzbd.timeleft", "00:01:00");
   });
 
-  it("does not enable polling when refreshInterval is omitted", () => {
+  it("uses the default queue limit when limit is omitted", () => {
     const widget = { type: "sabnzbd", url: "http://sabnzbd" };
 
     renderWithProviders(<Component service={{ widget }} />, {
       settings: { hideErrors: false },
     });
 
-    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { refreshInterval: undefined });
+    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { limit: 5 });
   });
 
-  it("passes the configured refresh interval to the widget API", () => {
+  it("passes the configured queue limit to the widget API", () => {
     const widget = { type: "sabnzbd", url: "http://sabnzbd", refreshInterval: 5000 };
 
     renderWithProviders(<Component service={{ widget }} />, {
       settings: { hideErrors: false },
     });
 
-    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { refreshInterval: 5000 });
+    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { limit: 5 });
   });
 
-  it("clamps refresh intervals below one second", () => {
-    const widget = { type: "sabnzbd", url: "http://sabnzbd", refreshInterval: 500 };
+  it("renders only the configured number of queue entries", () => {
+    useWidgetAPI.mockReturnValue({
+      data: {
+        queue: {
+          speed: "1.0 M",
+          noofslots: 2,
+          timeleft: "00:01:00",
+          slots: [
+            { filename: "First download", mbleft: 5, mb: 10, percentage: "50", status: "Downloading", nzo_id: "1" },
+            { filename: "Second download", mbleft: 10, mb: 10, percentage: "0", status: "", nzo_id: "2" },
+          ],
+        },
+      },
+      error: undefined,
+    });
+
+    const widget = { type: "sabnzbd", enableQueue: true, limit: 1 };
 
     renderWithProviders(<Component service={{ widget }} />, {
       settings: { hideErrors: false },
     });
 
-    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { refreshInterval: 1000 });
+    expect(screen.getAllByTestId("queue-entry")).toHaveLength(1);
+    expect(screen.getByText("First download")).toBeInTheDocument();
+    expect(screen.queryByText("Second download")).not.toBeInTheDocument();
+    expect(screen.getByTestId("queue-entry")).toHaveAttribute("data-activity", "Downloading");
+    expect(screen.getByTestId("queue-entry")).toHaveAttribute("data-progress", "50");
+    expect(useWidgetAPI).toHaveBeenCalledWith(widget, "queue", { limit: 1 });
   });
 });
