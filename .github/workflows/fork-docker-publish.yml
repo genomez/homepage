@@ -27,8 +27,8 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=sabnzbd-refresh-v2.0.0
-            type=sha,prefix=sha-
+            type=raw,value=sabnzbd-refresh-current
+            type=sha,prefix=sabnzbd-refresh-
 
       - name: Next.js build cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
