@@ -57,15 +57,17 @@ export default function Component({ service }) {
         <Block label="sabnzbd.timeleft" value={queueData.queue.timeleft} />
       </Container>
       {enableQueue &&
-        queueData.queue?.slots?.slice(0, limit).map((slot) => (
-          <QueueEntry
-            progress={getProgress(slot.mbleft, slot.mb)}
-            timeLeft={slot.timeleft}
-            title={slot.filename}
-            activity={slot.percentage === "0" ? "Queued" : slot.status}
-            key={slot.nzo_id ?? slot.filename}
-          />
-        ))}
+        queueData.queue?.slots
+          ?.slice(0, limit)
+          .map((slot) => (
+            <QueueEntry
+              progress={getProgress(slot.mbleft, slot.mb)}
+              timeLeft={slot.timeleft}
+              title={slot.filename}
+              activity={slot.percentage === "0" ? "Queued" : slot.status}
+              key={slot.nzo_id ?? slot.filename}
+            />
+          ))}
     </>
   );
 }
