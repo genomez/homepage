@@ -21,12 +21,22 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Verify sync token
+        env:
+          SYNC_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
+        shell: bash
+        run: |
+          if [ -z "${SYNC_TOKEN}" ]; then
+            echo "::error::UPSTREAM_SYNC_TOKEN repository secret is not configured."
+            exit 1
+          fi
+
       - name: Checkout patch branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: sabnzbd-refresh-interval-v2
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -61,7 +71,7 @@ jobs:
       - name: Open or reuse sync pull request
         if: steps.upstream.outputs.has_changes == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.UPSTREAM_SYNC_TOKEN }}
         shell: bash
         run: |
           existing_pr=$(gh pr list \
