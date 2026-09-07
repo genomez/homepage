@@ -52,6 +52,18 @@ describe("utils/proxy/use-widget-api", () => {
     );
   });
 
+  it("passes additional SWR configuration separately from the proxy query", () => {
+    useSWR.mockReturnValue({ data: undefined, error: undefined, mutate: vi.fn() });
+
+    const widget = { service_group: "g", service_name: "s", index: 0 };
+    const onSuccess = vi.fn();
+    useWidgetAPI(widget, "status", { refreshInterval: 1234 }, { onSuccess });
+
+    const [url, config] = useSWR.mock.calls[0];
+    expect(url).not.toContain("onSuccess");
+    expect(config).toEqual({ refreshInterval: 1234, onSuccess });
+  });
+
   it("returns data.error as the top-level error", () => {
     const dataError = { message: "nope" };
     useSWR.mockReturnValue({ data: { error: dataError }, error: undefined, mutate: vi.fn() });
