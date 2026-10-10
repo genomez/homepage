@@ -404,6 +404,7 @@ describe("utils/config/service-helpers", () => {
               { type: "sabnzbd", enableQueue: true, limit: 10, refreshInterval: 5000 },
               { type: "truenas", enablePools: "true", nasType: "scale" },
               { type: "qnap", volume: "vol1" },
+              { type: "qui", instance: 2 },
               { type: "dispatcharr", enableActiveStreams: "true" },
               { type: "gamedig", gameToken: "t" },
               { type: "kopia", snapshotHost: "h", snapshotPath: "/p" },
@@ -472,6 +473,7 @@ describe("utils/config/service-helpers", () => {
     expect(widgets.find((w) => w.type === "sabnzbd")).toEqual(
       expect.objectContaining({ enableQueue: true, limit: 10, refreshInterval: 5000 }),
     );
+    expect(widgets.find((w) => w.type === "qui")).toEqual(expect.objectContaining({ instance: 2 }));
     expect(widgets.find((w) => w.type === "speedtest")).toEqual(
       expect.objectContaining({ bitratePrecision: 3, version: 1 }),
     );
@@ -526,6 +528,38 @@ describe("utils/config/service-helpers", () => {
         color: "purple",
       },
     ]);
+  });
+
+  it("cleanServiceGroups keeps feed layout and drops server-side options", async () => {
+    const mod = await import("./service-helpers");
+    const { cleanServiceGroups } = mod;
+
+    const rawGroups = [
+      {
+        name: "Core",
+        services: [
+          {
+            name: "News",
+            widgets: [
+              {
+                type: "feed",
+                url: "https://example.com/feed.xml?token=secret",
+                maxItems: 3,
+                images: false,
+                layout: "grid",
+              },
+            ],
+          },
+        ],
+        groups: [],
+      },
+    ];
+
+    const feedWidget = cleanServiceGroups(rawGroups)[0].services[0].widgets[0];
+    expect(feedWidget).toEqual(expect.objectContaining({ type: "feed", layout: "grid" }));
+    expect(feedWidget).not.toHaveProperty("url");
+    expect(feedWidget).not.toHaveProperty("maxItems");
+    expect(feedWidget).not.toHaveProperty("images");
   });
 
   it("findGroupByName deep-searches and annotates parent", async () => {
