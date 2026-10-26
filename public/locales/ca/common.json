@@ -791,7 +791,7 @@
         "processing": "Processant",
         "processed": "Processat",
         "time": "Temps",
-        "failed": "Failed"
+        "failed": "Error"
     },
     "firefly": {
         "networth": "Valor Net",
@@ -987,6 +987,11 @@
         "movieReclaimable": "Pel·lícula reclamable",
         "showReclaimable": "Sèrie reclamable",
         "totalCapacity": "Capacitat total"
+    },
+    "netbird": {
+        "online": "Parells en línia",
+        "users": "Usuaris",
+        "login_expired": "Sessió caducada"
     },
     "netdata": {
         "warnings": "Avisos",

@@ -791,7 +791,7 @@
         "processing": "Behandler",
         "processed": "Behandlet",
         "time": "Tid",
-        "failed": "Failed"
+        "failed": "Fejlet"
     },
     "firefly": {
         "networth": "Nettoformue",
@@ -987,6 +987,11 @@
         "movieReclaimable": "Film Genanvendelig",
         "showReclaimable": "Vis Genanvendelig",
         "totalCapacity": "Samlet kapacitet"
+    },
+    "netbird": {
+        "online": "Online Peers",
+        "users": "Users",
+        "login_expired": "Login Expired"
     },
     "netdata": {
         "warnings": "Advarsler",
